@@ -1,14 +1,22 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const rootRoutes = require("./routes/root");
+const { expressjwt: jwt } = require("express-jwt");
 const userRoutes = require("./routes/users");
 const errorMiddleware = require("./middlewares/error");
+
+require("dotenv").config();
 
 const app = express();
 
 app.use(bodyParser.json());
 
-app.use("/", rootRoutes);
+app.use(
+  jwt({ secret: process.env.SECRET_KEY, algorithms: ["HS256"] }).unless({
+    path: ["/users/login"],
+  }),
+);
+
+app.use(bodyParser.json());
 
 app.use("/users", userRoutes);
 
