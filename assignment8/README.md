@@ -7,19 +7,15 @@ grant all privileges ON csbc1030.* to 'martin'@'localhost';
 flush privileges;
 ```
 
-Install knex globally (if haven't). Then run knex migrations folders.
-
-```
-npm i knex -g
-knex migrate:latest
-```
-
-Run the Express server in assignment6 folder.
+Run the Express server in assignment8 folder.
 Copy .env.example to .env
+Install knex globally (if haven't). Then run knex migrations folders.
 
 ```
 cp .env.example .env
 npm ci
+npm i knex -g
+knex migrate:latest
 npm run start
 ```
 
@@ -56,4 +52,10 @@ Try to run format and linter
 ```
 npm run format
 npm run lint
+```
+
+Try to run test
+
+```
+npm run test
 ```

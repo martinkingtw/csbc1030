@@ -13,23 +13,21 @@ userRoutes.get("/", (_, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send(err);
+      return res.status(500).send({ err: err.message });
     });
 });
 
-userRoutes.post("/", (req, res) => {
+userRoutes.post("/", async (req, res) => {
   if (req.auth.id !== 1) {
     return res.status(403).send("Cannot append user if not user ID 1");
   }
-  const userPromise = insertUser(req.body);
-  Promise.all([userPromise])
-    .then(() => {
-      return res.status(201).send("Success");
-    })
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).send(err);
-    });
+  try {
+    await insertUser(req.body);
+    return res.status(201).send("Success");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send({ err: err.message });
+  }
 });
 
 userRoutes.get("/:id", (req, res) => {
@@ -43,7 +41,7 @@ userRoutes.get("/:id", (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send(err);
+      return res.status(500).send({ err: err.message });
     });
 });
 
@@ -58,7 +56,7 @@ userRoutes.post("/login", (req, res) => {
       bcrypt.compare(req.body.password, user[0].hash, function (err, same) {
         if (err) {
           console.error(err);
-          return res.status(500).send(err);
+          return res.status(500).send({ err: err.message });
         }
         if (same) {
           const token = jwtSigner.sign(
@@ -76,7 +74,7 @@ userRoutes.post("/login", (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send(err);
+      return res.status(500).send({ err: err.message });
     });
 });
 
