@@ -18,7 +18,7 @@ userRoutes.get("/", (_, res) => {
 });
 
 userRoutes.post("/", (req, res) => {
-  if (req.auth.id !== "1") {
+  if (req.auth.id !== 1) {
     return res.status(403).send("Cannot append user if not user ID 1");
   }
   const userPromise = insertUser(req.body);
@@ -33,7 +33,7 @@ userRoutes.post("/", (req, res) => {
 });
 
 userRoutes.get("/:id", (req, res) => {
-  if (req.auth.id !== req.params.id) {
+  if (req.auth.id !== Number(req.params.id)) {
     return res.status(403).send("Cannot fetch other user's profile");
   }
   const userPromise = getUser(req.params.id);
@@ -55,19 +55,23 @@ userRoutes.post("/login", (req, res) => {
       if (user.length === 0) {
         return res.status(401).send({ error: "Invalid credentials" });
       }
-      bcrypt.compare(req.body.password, user[0].hash, function (err) {
+      bcrypt.compare(req.body.password, user[0].hash, function (err, same) {
         if (err) {
           console.error(err);
           return res.status(500).send(err);
         }
-        const token = jwtSigner.sign(
-          { id: user[0].id, username: user[0].username },
-          process.env.SECRET_KEY,
-          {
-            expiresIn: "1h",
-          },
-        );
-        return res.send({ token });
+        if (same) {
+          const token = jwtSigner.sign(
+            { id: user[0].id, username: user[0].username },
+            process.env.SECRET_KEY,
+            {
+              expiresIn: "1h",
+            },
+          );
+          return res.send({ token });
+        } else {
+          return res.status(401).send({ error: "Invalid credentials" });
+        }
       });
     })
     .catch((err) => {
