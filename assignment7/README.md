@@ -1,9 +1,21 @@
-Run the Express server in assignment6 folder.
+Set up the database, give permission to user
+
+```
+create database csbc1030;
+create user 'martin' @ 'localhost' identified by 'password';
+grant all privileges ON csbc1030.* to 'martin'@'localhost';
+flush privileges;
+```
+
+Run the Express server in assignment8 folder.
 Copy .env.example to .env
+Install knex globally (if haven't). Then run knex migrations folders.
 
 ```
 cp .env.example .env
 npm ci
+npm i knex -g
+knex migrate:latest
 npm run start
 ```
 
