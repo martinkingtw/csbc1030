@@ -8,7 +8,7 @@
     "format": "prettier --write .",
     "lint": "eslint . ",
     "lint:fix": "eslint . --fix ",
-    "test": "npx mocha ./test/users.test.js"
+    "test": "npx mocha ./test/**.test.js"
   },
   "author": "Martin King",
   "license": "ISC",

@@ -3,15 +3,13 @@ const { knex } = require("../utils/database");
 
 const SALT_ROUNDS = 10;
 
-const getAllUsers = () =>
-  new Promise((resolve) => {
-    return resolve(knex("users").select());
-  });
+const getAllUsers = async () => {
+  return knex("users").select("id", "username", "created_at", "updated_at");
+};
 
-const getUser = (id) =>
-  new Promise((resolve) => {
-    return resolve(knex("users").where("id", id).select());
-  });
+const getUserByUsername = async (username) => {
+  return knex("users").where("username", username).select();
+};
 
 const insertUser = async (user) => {
   const usernameCheck = await knex("users")
@@ -21,8 +19,7 @@ const insertUser = async (user) => {
     throw new Error("username used");
   }
   const hash = await bcrypt.hash(user.password, SALT_ROUNDS);
-  await knex("users").insert({ username: user.username, hash });
-  return;
+  return knex("users").insert({ username: user.username, hash });
 };
 
-module.exports = { getAllUsers, getUser, insertUser };
+module.exports = { getAllUsers, getUserByUsername, insertUser };
