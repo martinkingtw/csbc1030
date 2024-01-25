@@ -1,0 +1,49 @@
+name: Deploy to GCP Cloud Run
+
+on:
+  push:
+    branches:
+      - develop
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to GCP Cloud Run
+    runs-on: ubuntu-latest
+    environment: env
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Login to Google
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Build and upload Docker to registry
+      run: |
+        gcloud auth configure-docker us-east4-docker.pkg.dev
+        docker build -t us-east4-docker.pkg.dev/assignment-3-412300/assignment3/v1.0.0 --platform linux/x86_64 .
+        docker push us-east4-docker.pkg.dev/assignment-3-412300/assignment3/v1.0.0
+
+
+    - name: Deploy to GCP Cloud Run
+      id: deploy
+      uses: 'google-github-actions/deploy-cloudrun@v2'
+      with:
+        service: 'assignment-3'
+        image: 'us-east4-docker.pkg.dev/assignment-3-412300/assignment3/v1.0.0:latest'
+        env_vars: |
+          DB_HOST=localhost
+          DB_USER=martin
+          DB_DATABASE=csbc1030
+          INSTANCE_UNIX_SOCKET=/cloudsql/assignment-3-412300:us-central1:assignment3
+        secrets: |
+          SECRET_KEY=SECRET_KEY:latest
+          DB_PASSWORD=DB_PASSWORD:latest
+
+    - name: 'Output URL'
+      run: 'echo "${{ steps.deploy.outputs.url }}"'

@@ -1,0 +1,65 @@
+name: Run lint and test on all PR
+
+on:
+  pull_request:
+    branches:
+      - "**"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Run lint and test on all PR
+    runs-on: ubuntu-latest
+    environment: env
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_HOST: localhost
+      DB_USER: martin
+      DB_DATABASE: csbc1030
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: '21.0.0'
+
+    - name: Install dependencies
+      working-directory: ./final
+      run: |
+        npm ci
+
+    - name: Run linter
+      working-directory: ./final
+      run: |
+        npm run lint
+
+    - name: Start MySQL
+      working-directory: ./final
+      run: sudo /etc/init.d/mysql start
+
+    - name: Create test database
+      working-directory: ./final
+      run: mysql -uroot -proot < ./utils/tester.sql
+
+    - name: Seed database
+      working-directory: ./final
+      run: |
+        npm i knex -g
+        knex migrate:latest
+
+    - name: Start server
+      working-directory: ./final
+      run: |
+        npm install wait-on -g
+        npm start & npx wait-on http-get://localhost:3000/users
+
+    - name: Run testing
+      working-directory: ./final
+      run: |
+        npm run test

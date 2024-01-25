@@ -25,7 +25,6 @@ Try to login the endpoint POST /login in Postman
 apple password is 12345, banana password is 67890, candy password is abcde
 
 ```
-localhost:3000/login
 {
     "username": "apple",
     "password": "12345"
